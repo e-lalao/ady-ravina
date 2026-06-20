@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npx ng build --base-href /${{ github.event.repository.name }}/ --configuration production
+        run: npx ng build --base-href /Ady-ravina/ --configuration production
 
       - name: Copier index.html → 404.html (routing SPA)
         run: cp dist/ady-ravina/browser/index.html dist/ady-ravina/browser/404.html
