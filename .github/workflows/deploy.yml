@@ -1,0 +1,41 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (base-href = nom du repo)
+        run: npx ng build --base-href /${{ github.event.repository.name }}/ --configuration production
+
+      - name: Copier index.html → 404.html (routing SPA)
+        run: cp dist/ady-ravina/browser/index.html dist/ady-ravina/browser/404.html
+
+      - name: Ajouter .nojekyll (désactive Jekyll de GitHub Pages)
+        run: touch dist/ady-ravina/browser/.nojekyll
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: dist/ady-ravina/browser

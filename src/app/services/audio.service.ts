@@ -8,7 +8,7 @@ export class AudioService {
 
   startBackground() {
     if (this.bgStarted) return;
-    this.bgMusic = new Audio('/sounds/music-background-ady-ravina.mp3');
+    this.bgMusic = new Audio('sounds/music-background-ady-ravina.mp3');
     this.bgMusic.loop = true;
     this.bgMusic.volume = 0.35;
     this.bgMusic.muted = this.muted();
@@ -24,21 +24,21 @@ export class AudioService {
 
   playWoueh() {
     if (this.muted()) return;
-    const a = new Audio('/sounds/woueh.mp3');
+    const a = new Audio('sounds/woueh.mp3');
     a.volume = 0.8;
     a.play().catch(() => {});
   }
 
   playHey() {
     if (this.muted()) return;
-    const a = new Audio('/sounds/hey.mp3');
+    const a = new Audio('sounds/hey.mp3');
     a.volume = 0.9;
     a.play().catch(() => {});
   }
 
   playClick() {
     if (this.muted()) return;
-    const a = new Audio('/sounds/click.mp3');
+    const a = new Audio('sounds/click.mp3');
     a.volume = 0.5;
     a.play().catch(() => {});
   }

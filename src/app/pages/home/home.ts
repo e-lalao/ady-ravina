@@ -415,7 +415,7 @@ const T = {
     <!-- ══════════════════ SPLASH ══════════════════ -->
     @if (!started()) {
       <div class="splash-overlay" (click)="onStart()">
-        <img src="/accueil-Ady-ravina.png" alt="Ady Ravina" class="splash-logo" />
+        <img src="accueil-Ady-ravina.png" alt="Ady Ravina" class="splash-logo" />
         <p class="splash-title">Ady Ravina</p>
         <p class="splash-tap">▶ Tsindrio eto raha hanomboka</p>
       </div>
@@ -451,7 +451,7 @@ const T = {
           <!-- ── Gauche : texte ── -->
           <div class="left-col">
             <div class="brand-badge">
-              <img src="/logo-de-e-lalao.png" alt="e-lalao" class="brand-logo" />
+              <img src="logo-de-e-lalao.png" alt="e-lalao" class="brand-logo" />
             </div>
 
             <h1 class="game-title">Ady Ravina</h1>
@@ -491,7 +491,7 @@ const T = {
             <div class="image-frame">
               <div class="frame-glow"></div>
               <img
-                src="/accueil-Ady-ravina.png"
+                src="accueil-Ady-ravina.png"
                 alt="Ady Ravina"
                 class="illustration"
                 [class.jump-anim]="imageAnim()"
@@ -586,7 +586,7 @@ const T = {
 
       <!-- ══════════════════ FOOTER ══════════════════ -->
       <footer class="site-footer">
-        <img src="/logo-de-e-lalao.png" alt="e-lalao" class="footer-logo" />
+        <img src="logo-de-e-lalao.png" alt="e-lalao" class="footer-logo" />
         <p class="footer-line">{{ t().footerLine }}</p>
         <p class="footer-copy">© {{ year }} e-lalao</p>
       </footer>
