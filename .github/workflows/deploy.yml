@@ -6,10 +6,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,14 +31,24 @@ jobs:
       - name: Build
         run: npx ng build --base-href /ady-ravina/ --configuration production
 
-      - name: Copier index.html → 404.html (routing SPA)
+      - name: Copier index.html → 404.html
         run: cp dist/ady-ravina/browser/index.html dist/ady-ravina/browser/404.html
 
       - name: Add .nojekyll
         run: touch dist/ady-ravina/browser/.nojekyll
 
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: dist/ady-ravina/browser
+          path: dist/ady-ravina/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
