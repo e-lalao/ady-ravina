@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { SupabaseService } from '../../services/supabase.service';
 import { AudioService } from '../../services/audio.service';
+import { I18nService } from '../../services/i18n.service';
 import { LEAVES, shuffleArray, getPlayerId, BattleData } from '../../models/game.models';
 
 @Component({
@@ -13,6 +14,16 @@ import { LEAVES, shuffleArray, getPlayerId, BattleData } from '../../models/game
   template: `
     <div class="min-h-screen bg-green-50 relative select-none overflow-hidden">
 
+      @if (preparing()) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center"
+             style="background: rgba(22,163,74,0.95)">
+          <p class="text-white font-black leading-none"
+             style="font-family:'Fredoka One',cursive; font-size: 40vw; line-height:1">
+            {{ prepCountdown() }}
+          </p>
+        </div>
+      }
+
       <!-- Barre de timer fixe en haut -->
       <div class="fixed top-0 left-0 right-0 z-10 bg-white shadow-sm">
         <div class="h-1.5 bg-green-100">
@@ -20,13 +31,13 @@ import { LEAVES, shuffleArray, getPlayerId, BattleData } from '../../models/game
                [style.width.%]="timerPercent()"></div>
         </div>
         <div class="flex justify-between items-center px-4 py-2">
-          <span class="text-green-700 font-bold text-sm">Hanangona ravina!</span>
+          <span class="text-green-700 font-bold text-sm">{{ t().collectTitle }}</span>
           <span class="text-xl font-bold"
                 [class]="timeLeft() <= 2 ? 'text-red-500 animate-pulse' : 'text-green-600'">
             {{ timeLeft() }}s
           </span>
           <span class="text-green-600 font-semibold text-sm">
-            {{ collected().size }} ravina
+            {{ collected().length }} {{ t().leavesUnit }}
           </span>
         </div>
       </div>
@@ -44,7 +55,7 @@ import { LEAVES, shuffleArray, getPlayerId, BattleData } from '../../models/game
           @for (leaf of shuffledLeaves; track leaf.id) {
             <button
               (click)="collectLeaf(leaf.id)"
-              [class]="collected().has(leaf.id)
+              [class]="leafCount(leaf.id) > 0
                 ? 'ring-2 ring-green-500 bg-green-100'
                 : 'bg-white active:bg-green-50'"
               class="rounded-xl shadow-sm p-1.5 flex flex-col items-center
@@ -56,8 +67,10 @@ import { LEAVES, shuffleArray, getPlayerId, BattleData } from '../../models/game
               <span class="text-[10px] text-gray-600 text-center leading-tight mt-1 px-0.5">
                 {{ leaf.name }}
               </span>
-              @if (collected().has(leaf.id)) {
-                <span class="text-green-500 text-[10px] font-bold leading-none">✓</span>
+              @if (leafCount(leaf.id) > 0) {
+                <span class="text-green-500 text-[10px] font-bold leading-none">
+                  ✓@if (leafCount(leaf.id) > 1) { ×{{ leafCount(leaf.id) }} }
+                </span>
               }
             </button>
           }
@@ -72,9 +85,8 @@ import { LEAVES, shuffleArray, getPlayerId, BattleData } from '../../models/game
           <div class="bubble-in absolute bottom-[200px] right-[140px] w-52 pointer-events-auto"
                (click)="dismissTante()">
             <div class="bg-white rounded-2xl shadow-2xl px-4 py-3 relative border border-green-100">
-              <p class="text-gray-800 text-sm font-semibold leading-snug text-center">
-                Rankizy a!<br>Aza tangosinareo ny anananako.
-              </p>
+              <p class="text-gray-800 text-sm font-semibold leading-snug text-center"
+                 [innerHTML]="t().tanteQuote"></p>
               <!-- Triangle vers le bas-droite (pointe vers tante) -->
               <div class="absolute -bottom-2.5 right-6
                           border-l-8 border-r-8 border-t-[10px]
@@ -92,7 +104,7 @@ import { LEAVES, shuffleArray, getPlayerId, BattleData } from '../../models/game
           <!-- Texte "tap pour continuer" -->
           <p class="bubble-in absolute bottom-2 right-4 text-white/60 text-[10px]
                     pointer-events-none" style="animation-delay: 0.9s">
-            Tsindrio hanohy
+            {{ t().tapToContinue }}
           </p>
         </div>
       }
@@ -105,19 +117,24 @@ export class CollectComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private supabase = inject(SupabaseService);
   private audio = inject(AudioService);
+  private i18n = inject(I18nService);
+  readonly t = this.i18n.t;
 
   readonly shuffledLeaves = shuffleArray(LEAVES);
-  collected = signal<Set<number>>(new Set());
+  collected = signal<number[]>([]);
 
   timeLeft = signal(5);
   timerPercent = signal(100);
   timerDone = signal(false);
   showTante = signal(false);
+  preparing = signal(true);
+  prepCountdown = signal(3);
 
   private roomCode = '';
   private duration = 5;
   private roomData: any = null;
   private timerInterval: ReturnType<typeof setInterval> | null = null;
+  private prepInterval: ReturnType<typeof setInterval> | null = null;
   private channel: RealtimeChannel | null = null;
   private timerFired = false;
   private navigated = false;
@@ -131,13 +148,32 @@ export class CollectComponent implements OnInit, OnDestroy {
     if (data) {
       this.roomData = data;
       this.duration = data['duration'] ?? 5;
-      const elapsed = (Date.now() - Number(data['started_at'])) / 1000;
-      const remaining = Math.max(0, this.duration - elapsed);
-      this.timeLeft.set(Math.ceil(remaining));
-      this.timerPercent.set((remaining / this.duration) * 100);
+      const startsAt = Number(data['started_at']);
+      const now = Date.now();
 
-      if (remaining <= 0) this.onTimerEnd();
-      else this.startTimer(remaining);
+      if (now < startsAt) {
+        this.timeLeft.set(this.duration);
+        this.timerPercent.set(100);
+        this.prepCountdown.set(Math.ceil((startsAt - now) / 1000));
+        this.prepInterval = setInterval(() => {
+          const left = startsAt - Date.now();
+          if (left <= 0) {
+            clearInterval(this.prepInterval!);
+            this.preparing.set(false);
+            this.startTimer(this.duration);
+          } else {
+            this.prepCountdown.set(Math.ceil(left / 1000));
+          }
+        }, 100);
+      } else {
+        this.preparing.set(false);
+        const elapsed = (now - startsAt) / 1000;
+        const remaining = Math.max(0, this.duration - elapsed);
+        this.timeLeft.set(Math.ceil(remaining));
+        this.timerPercent.set((remaining / this.duration) * 100);
+        if (remaining <= 0) this.onTimerEnd();
+        else this.startTimer(remaining);
+      }
     }
 
     this.channel = this.supabase.client
@@ -154,6 +190,7 @@ export class CollectComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.timerInterval) clearInterval(this.timerInterval);
+    if (this.prepInterval) clearInterval(this.prepInterval);
     this.channel?.unsubscribe();
   }
 
@@ -173,14 +210,14 @@ export class CollectComponent implements OnInit, OnDestroy {
     }, 100);
   }
 
+  leafCount(id: number): number {
+    return this.collected().filter(i => i === id).length;
+  }
+
   collectLeaf(id: number) {
     if (this.timerFired) return;
-    const s = new Set(this.collected());
-    if (!s.has(id)) {
-      s.add(id);
-      this.collected.set(s);
-      this.audio.playClick();
-    }
+    this.collected.update(arr => [...arr, id]);
+    this.audio.playClick();
   }
 
   async onTimerEnd() {
@@ -196,7 +233,7 @@ export class CollectComponent implements OnInit, OnDestroy {
         room_code: this.roomCode,
         player_id: playerId,
         player_name: playerName,
-        leaves: Array.from(this.collected()),
+        leaves: this.collected(),
       },
       { onConflict: 'room_code,player_id' }
     );
@@ -242,6 +279,9 @@ export class CollectComponent implements OnInit, OnDestroy {
       hands: JSON.parse(JSON.stringify(colMap)),
       original_collections: JSON.parse(JSON.stringify(colMap)),
       scores: Object.fromEntries(playerOrder.map(id => [id, 0])),
+      phase: 'dropping',
+      dropped_leaf: null,
+      responses: {},
       last_played: null,
       done: false,
     };

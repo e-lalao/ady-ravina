@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { SupabaseService } from '../../services/supabase.service';
 import { AudioService } from '../../services/audio.service';
+import { I18nService } from '../../services/i18n.service';
 import { BattleData, getPlayerId } from '../../models/game.models';
 
 interface PlayerResult {
@@ -21,31 +22,31 @@ interface PlayerResult {
       <!-- En-tête -->
       <div class="bg-gradient-to-br from-green-800 to-green-600 pt-10 pb-8 px-4 text-center">
         <div class="text-5xl mb-2">🏆</div>
-        <h1 class="text-2xl font-black text-white">Vokatry ny lalao</h1>
+        <h1 class="text-2xl font-black text-white">{{ t().resultsTitle }}</h1>
       </div>
 
       <div class="max-w-sm mx-auto px-4 -mt-4">
 
         @if (loading()) {
           <div class="bg-white rounded-2xl shadow-md p-8 text-center">
-            <p class="text-green-500 animate-pulse text-sm">Miandry...</p>
+            <p class="text-green-500 animate-pulse text-sm">{{ t().resultLoading }}</p>
           </div>
         }
 
         @if (!loading()) {
 
-          <!-- Podium / gagnant -->
+          <!-- Gagnant -->
           @if (winner()) {
             <div class="bg-yellow-50 border-2 border-yellow-300 rounded-2xl shadow-md p-6 mb-4 text-center">
               <div class="text-4xl mb-1">🥇</div>
               <p class="text-xl font-black text-yellow-700">{{ winner()!.name }}</p>
-              <p class="text-yellow-600 text-sm">Mandresy! — {{ winner()!.score }} </p>
+              <p class="text-yellow-600 text-sm">{{ t().winnerLabel }} — {{ winner()!.score }}</p>
             </div>
           }
 
-          <!-- Classement complet -->
+          <!-- Classement -->
           <div class="bg-white rounded-2xl shadow-md p-4 mb-4">
-            <h3 class="text-green-700 font-bold text-sm mb-3 text-center">Fitsarana</h3>
+            <h3 class="text-green-700 font-bold text-sm mb-3 text-center">{{ t().rankingLabel }}</h3>
             <div class="flex flex-col gap-2">
               @for (p of sorted(); track p.id; let i = $index) {
                 <div class="flex items-center gap-3 p-3 rounded-xl"
@@ -56,7 +57,7 @@ interface PlayerResult {
                   </span>
                   <div class="flex-1 min-w-0">
                     <p class="font-bold text-gray-800 text-sm truncate">{{ p.name }}</p>
-                    <p class="text-gray-400 text-xs">{{ p.leavesCount }} ravina angona</p>
+                    <p class="text-gray-400 text-xs">{{ p.leavesCount }} {{ t().leavesCollected }}</p>
                   </div>
                   <span class="text-lg font-black text-green-600 flex-shrink-0">
                     {{ p.score }} pts
@@ -71,18 +72,18 @@ interface PlayerResult {
             <button (click)="playAgain()"
                     class="w-full bg-green-500 hover:bg-green-600 text-white font-bold
                            py-4 rounded-xl text-base transition-colors mb-3 select-none">
-              Hilalao indray
+              {{ t().playAgain }}
             </button>
           } @else {
             <p class="text-center text-green-500 text-sm animate-pulse py-2">
-              Miandry ny tompon'ny vondrona...
+              {{ t().waitingForHostResults }}
             </p>
           }
 
           <button (click)="router.navigate(['/'])"
                   class="w-full border-2 border-green-300 text-green-600 font-bold
                          py-3 rounded-xl text-sm transition-colors select-none">
-            Hiverina any amin\'ny pejy voalohany
+            {{ t().backToHome }}
           </button>
         }
 
@@ -95,6 +96,8 @@ export class ResultsComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private supabase = inject(SupabaseService);
   private audio = inject(AudioService);
+  readonly i18n = inject(I18nService);
+  readonly t = this.i18n.t;
 
   loading = signal(true);
   results = signal<PlayerResult[]>([]);
@@ -118,7 +121,6 @@ export class ResultsComponent implements OnInit, OnDestroy {
       this.buildResults(data['battle_data']);
     }
 
-    // Réagir si l'hôte remet la salle en 'waiting'
     this.channel = this.supabase.client
       .channel(`results-${this.code}`)
       .on('postgres_changes', {

@@ -21,6 +21,9 @@ export interface BattleData {
   hands: Record<string, number[]>;
   original_collections: Record<string, number[]>;
   scores: Record<string, number>;
+  phase: 'dropping' | 'responding';
+  dropped_leaf: number | null;
+  responses: Record<string, number | null>;
   last_played: LastPlayed | null;
   done: boolean;
 }

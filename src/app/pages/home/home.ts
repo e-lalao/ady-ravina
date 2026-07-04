@@ -1,60 +1,9 @@
-import { Component, signal, computed, inject } from '@angular/core';
+﻿import { Component, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AudioService } from '../../services/audio.service';
 import { SupabaseService } from '../../services/supabase.service';
+import { I18nService } from '../../services/i18n.service';
 
-type Lang = 'mg' | 'fr' | 'en';
-
-const T = {
-  mg: {
-    rulesTitle:    'Ny Ady Ravina',
-    rulesSub:      'Kilalao fanaon\'ny ankizy malagasy',
-    r1q: 'Inona moa ny ady ravina?',
-    r1a: 'Kilalao fanaon\'ny ankizy malagasy ny ady ravina. Rehefa ilay miala sasatra any ambanivohitra na monina amin\'ny toerana feno zava-maitso iny no tena fampiadiana ravina. Ravin-kazo matetika no fampiadiana — bedin\'ny olon-dehibe manko raha tratra mitango anana na voninkazo nambolena!',
-    r2q: 'Ahoana no filalaovana azy?',
-    r2a: 'Miparitaka ny rehetra ka miezaka manangona karazan-dravina isan-karazany. Misy iray mandatsaka ravina iray eo amin\'ny tany (ohatra: ravi-manga), dia mandatsaka ravina mitovy karazana aminy avokoa ny rehetra(Izany hoe ravi-manga koa). Resy izay tsy manana an\'ilay ravina alatsaka. Mitohy hatrany ny lalao mandrapahalany ny ravina eny an-tananan\'ny rehetra. Atambatra ny isa ka izay be isa indrinda no mandresy!',
-    r3q: 'Amin\'ity kilalao ity mba ahoana?',
-    r3a: 'Omena 4 segondra farafahakeliny ary 7 segondra farafahabeny ny mpilalao rehetra isafidianana ravina haingana. Mety tsy hitovy karazana ary tsy mitovy isa araka izany ny ravin\'ny mpilalao tsirairay. Avy eo manomboka ny ady ravina!',
-    aboutTitle:    'Momba ny e-lalao',
-    aboutText:     'Ny e-lalao dia tetikasa iezahana hanandratana ny fiteny sy ny kolontsaina malagasy amin\'ny alalan\'ny teknolojia avo lenta. Misokatra amin\'ny fiaraha-miasa sy torohevitra ary ny famatsiana rehetra izahay. Ny hevitrao dia sarobidy aminay — aza misalasala mifandray aminay raha misy tianao zaraina.',
-    contactBtn:    'Te hifandray aminay',
-    visitBtn:      'Hitsidika ny tranokala e-lalao',
-    contactLabel:  'Alefaso ny hevitrao',
-    footerLine:    'Natao am-pitiavana hanandratana ny ny kolontsaina malagasy',
-  },
-  fr: {
-    rulesTitle:    'L\'Ady Ravina',
-    rulesSub:      'La bataille des feuilles - jeu traditionel malagasy',
-    r1q: 'Qu\'est-ce que l\'ady ravina ?',
-    r1a: 'L\'ady ravina est un jeu traditionnel pratiqué par les enfants malgaches à la campagne ou dans les zones verdoyantes. On se bat avec des feuilles ramassées dans la nature. Les adultes grondent souvent ceux qui se font attraper à cueillir les feuilles de leurs légumes ou les herbes et fleurs de leurs jardins !',
-    r2q: 'Comment y jouer ?',
-    r2a: 'Tout le monde se disperse et ramasse le plus de variétés de feuilles possible. Ensuite, un joueur pose une feuille au sol (ex. : feuille de manguier) — tous ceux qui en ont une pareille la posent aussi. Celui qui n\'en a pas perd ce tour. On continue ainsi jusqu\'à ce que plus personne n\'ait de feuilles, puis on compte les points. Celui qui en a le plus gagne !',
-    r3q: 'Dans ce jeu ?',
-    r3a: 'Chaque joueur dispose de 4 à 7 secondes pour collecter le plus de feuilles possible. Les collections peuvent varier d\'un joueur à l\'autre. Ensuite commence le vrai affrontement !',
-    aboutTitle:    'À propos d\'e-lalao',
-    aboutText:     'e-lalao est un projet dédié à la valorisation de la langue et de la culture malgaches à travers la technologie moderne. Nous sommes ouverts à toute collaboration, conseil ou soutien. Vos idées nous sont précieuses — n\'hésitez pas à nous écrire.',
-    contactBtn:    'Nous contacter',
-    visitBtn:      'Visiter le site e-lalao',
-    contactLabel:  'Envoyez-nous vos idées et suggestions',
-    footerLine:    'Fait avec amour pour la culture malgache',
-  },
-  en: {
-    rulesTitle:    'Ady Ravina',
-    rulesSub:      'The traditional Malagasy leaf-fighting game',
-    r1q: 'What is ady ravina?',
-    r1a: 'Ady ravina is a traditional game played by Malagasy children in the countryside or in lush green areas. Players battle it out using leaves collected from nature. Adults often scold anyone caught picking their vegetables or planted flowers!',
-    r2q: 'How to play?',
-    r2a: 'Everyone spreads out and collects as many different types of leaves as possible. Then one player drops a leaf on the ground (e.g. mango leaf) — everyone who has the same leaf drops it too. Those who don\'t have it lose that round. The game continues until everyone runs out of leaves, then points are tallied. Highest score wins!',
-    r3q: 'In this game?',
-    r3a: 'Each player gets between 4 and 7 seconds to collect as many leaves as they can. Collections may differ between players. Then the real battle begins!',
-    aboutTitle:    'About e-lalao',
-    aboutText:     'e-lalao is a project dedicated to promoting the Malagasy language and culture through modern technology. We are open to all collaborations, advice and support. Your ideas matter to us — feel free to reach out.',
-    contactBtn:    'Contact us',
-    visitBtn:      'Visit the e-lalao website',
-    contactLabel:  'Send us your ideas and feedback',
-    footerLine:    'Made with love for Malagasy culture',
-  },
-} as const;
 
 @Component({
   selector: 'app-home',
@@ -87,6 +36,21 @@ const T = {
       font-size: clamp(.95rem, 3vw, 1.2rem); color: rgba(255,255,255,.8);
       animation: splashBlink 1.4s ease-in-out infinite;
     }
+    .splash-lang {
+      position: absolute; top: 1.2rem; right: 1.2rem;
+      display: flex; gap: .4rem; z-index: 10;
+    }
+    .splash-lang-btn {
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 1rem; padding: .25rem .7rem;
+      font-family: 'Fredoka One', cursive; font-size: .9rem;
+      color: rgba(255,255,255,.85); cursor: pointer; transition: all .2s;
+    }
+    .splash-lang-btn.active {
+      background: rgba(255,255,255,.92); color: #16a34a;
+      border-color: rgba(255,255,255,.9);
+    }
+    .splash-lang-btn:not(.active):hover { background: rgba(255,255,255,.3); }
     @keyframes splashPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);} }
     @keyframes splashBlink { 0%,100%{opacity:1;} 50%{opacity:.4;} }
 
@@ -415,9 +379,14 @@ const T = {
     <!-- ══════════════════ SPLASH ══════════════════ -->
     @if (!started()) {
       <div class="splash-overlay" (click)="onStart()">
+        <div class="splash-lang" (click)="$event.stopPropagation()">
+          <button class="splash-lang-btn" [class.active]="i18n.lang() === 'mg'" (click)="i18n.setLang('mg')">MG</button>
+          <button class="splash-lang-btn" [class.active]="i18n.lang() === 'fr'" (click)="i18n.setLang('fr')">FR</button>
+          <button class="splash-lang-btn" [class.active]="i18n.lang() === 'en'" (click)="i18n.setLang('en')">EN</button>
+        </div>
         <img src="accueil-Ady-ravina.png" alt="Ady Ravina" class="splash-logo" />
         <p class="splash-title">Ady Ravina</p>
-        <p class="splash-tap">▶ Tsindrio eto raha hanomboka</p>
+        <p class="splash-tap">{{ t().splashTap }}</p>
       </div>
     }
 
@@ -427,8 +396,8 @@ const T = {
       <main class="home">
 
         <nav class="top-nav">
-          <button class="nav-link" (click)="scrollToRules()">🌿 Ny fitsipika</button>
-          <button class="nav-link" (click)="scrollToAbout()">🌿 e-lalao</button>
+          <button class="nav-link" (click)="scrollToRules()">{{ t().navRules }}</button>
+          <button class="nav-link" (click)="scrollToAbout()">{{ t().navAbout }}</button>
         </nav>
 
         <!-- Clouds -->
@@ -457,18 +426,18 @@ const T = {
             <h1 class="game-title">Ady Ravina</h1>
 
             <div class="speech-bubble">
-              <p class="question-text">Andao<br>hampiady<br>ravina ô!</p>
+              <p class="question-text" [innerHTML]="t().speechBubble"></p>
               <div class="bubble-tail"></div>
             </div>
 
             <div class="play-btns">
               <button class="play-btn" (click)="onHilalao()">
                 <span class="play-circle">▶</span>
-                <span class="play-label">Hilalao</span>
+                <span class="play-label">{{ t().playBtn }}</span>
               </button>
               <button class="multi-btn" (click)="scrollToRules()">
                 <span class="multi-icon">📖</span>
-                <span class="multi-label">Ny fitsipika</span>
+                <span class="multi-label">{{ t().rulesBtn }}</span>
               </button>
             </div>
 
@@ -507,7 +476,7 @@ const T = {
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
                 <span class="visitors-count">{{ visitors()!.toLocaleString() }}</span>
-                <span class="visitors-label">Mpitsidika</span>
+                <span class="visitors-label">{{ t().visitorsLabel }}</span>
               </div>
             }
           </div>
@@ -524,9 +493,9 @@ const T = {
       <section class="rules-section" id="fitsipika">
         <div class="rules-header">
           <div class="lang-toggle">
-            <button class="lang-btn" [class.active]="lang() === 'mg'" (click)="lang.set('mg')">MG</button>
-            <button class="lang-btn" [class.active]="lang() === 'fr'" (click)="lang.set('fr')">FR</button>
-            <button class="lang-btn" [class.active]="lang() === 'en'" (click)="lang.set('en')">EN</button>
+            <button class="lang-btn" [class.active]="i18n.lang() === 'mg'" (click)="i18n.setLang('mg')">MG</button>
+            <button class="lang-btn" [class.active]="i18n.lang() === 'fr'" (click)="i18n.setLang('fr')">FR</button>
+            <button class="lang-btn" [class.active]="i18n.lang() === 'en'" (click)="i18n.setLang('en')">EN</button>
           </div>
           <h2 class="rules-title">🌿 {{ t().rulesTitle }}</h2>
           <p class="rules-sub">{{ t().rulesSub }}</p>
@@ -570,7 +539,7 @@ const T = {
             <span>{{ t().contactBtn }}</span>
           </a>
           <a class="visit-btn"
-             href="https://e-lalao.mg"
+             href="https://e-lalao.github.io/e-lalao/"
              target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  stroke-linecap="round" stroke-linejoin="round" class="visit-icon">
@@ -599,11 +568,12 @@ export class HomeComponent {
   private supabase = inject(SupabaseService);
   readonly audio   = inject(AudioService);
 
-  started    = signal(false);
-  imageAnim  = signal(false);
-  lang       = signal<Lang>('mg');
-  t          = computed(() => T[this.lang()]);
-  visitors   = signal<number | null>(null);
+  readonly i18n = inject(I18nService);
+  readonly t    = this.i18n.t;
+
+  started   = signal(false);
+  imageAnim = signal(false);
+  visitors  = signal<number | null>(null);
   readonly year = new Date().getFullYear();
 
   async onStart() {

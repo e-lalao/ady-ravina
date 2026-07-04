@@ -2,6 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
+import { I18nService } from '../../services/i18n.service';
 import { getPlayerId } from '../../models/game.models';
 
 @Component({
@@ -75,26 +76,26 @@ import { getPlayerId } from '../../models/game.models';
         <img src="logo-de-e-lalao.png" alt="Ady Ravina" class="logo" />
 
         @if (loading()) {
-          <p class="loading-msg">Mitady efitra...</p>
+          <p class="loading-msg">{{ t().searching }}</p>
         } @else if (error()) {
           <p class="error-msg">{{ error() }}</p>
-          <button class="join-btn" (click)="router.navigate(['/'])">← Hody</button>
+          <button class="join-btn" (click)="router.navigate(['/'])">{{ t().back }}</button>
         } @else {
-          <p class="invite-label">Voasasatra handray anjara amin'ny</p>
+          <p class="invite-label">{{ t().invitedToJoin }}</p>
 
           <div class="room-code-box">
-            <p class="room-code-hint">Code ny vondrona</p>
+            <p class="room-code-hint">{{ t().roomCode }}</p>
             <p class="room-code">{{ roomCode }}</p>
           </div>
 
           <div class="name-group">
-            <label class="name-label" for="nameInput">Ny anaranao :</label>
+            <label class="name-label" for="nameInput">{{ t().enterYourName }}</label>
             <input
               id="nameInput"
               class="name-input"
               type="text"
               [(ngModel)]="playerName"
-              placeholder="Ohatra: Rakoto"
+              [placeholder]="t().namePlaceholderJoin"
               maxlength="20"
               (keydown.enter)="join()"
               autocomplete="off"
@@ -105,7 +106,7 @@ import { getPlayerId } from '../../models/game.models';
             class="join-btn"
             [disabled]="!playerName.trim() || joining()"
             (click)="join()">
-            {{ joining() ? 'Miditra...' : 'Miditra ▶' }}
+            {{ joining() ? t().joiningLabel : t().joinBtnLabel }}
           </button>
         }
       </div>
@@ -116,6 +117,8 @@ export class JoinComponent implements OnInit {
   readonly router = inject(Router);
   private route   = inject(ActivatedRoute);
   private supabase = inject(SupabaseService);
+  readonly i18n   = inject(I18nService);
+  readonly t      = this.i18n.t;
 
   roomCode   = '';
   playerName = '';
@@ -132,11 +135,11 @@ export class JoinComponent implements OnInit {
     this.loading.set(false);
 
     if (!data) {
-      this.error.set('Tsy hita ity efitra ity. Manamarina ny teny miafina azafady.');
+      this.error.set(this.t().roomNotFoundJoin);
       return;
     }
     if (data['state'] !== 'waiting') {
-      this.error.set('Efa nanomboka ny lalao. Teneno ny namanao hametraka code vaovao.');
+      this.error.set(this.t().gameStartedJoin);
     }
   }
 
@@ -149,7 +152,6 @@ export class JoinComponent implements OnInit {
 
     const playerId = getPlayerId();
 
-    // Ajouter le joueur dans la liste players du room
     const { data: room } = await this.supabase.client
       .from('rooms').select('players').eq('code', this.roomCode).single();
 
