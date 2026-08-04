@@ -39,7 +39,7 @@ import { BattleData, getLeafName, getPlayerId } from '../../models/game.models';
         @if (showResult() && lastPlayed()) {
           <div class="bg-white rounded-2xl shadow-md p-5 mb-4 text-center">
             <p class="text-gray-500 text-xs mb-2">{{ t().roundResult }}</p>
-            <img [src]="lastPlayed()!.leaf_id + '.jpg'"
+            <img [src]="lastPlayed()!.leaf_id + '.webp'"
                  class="w-20 h-20 object-cover rounded-2xl mx-auto mb-2 shadow-md">
             <p class="font-bold text-green-800 text-sm mb-3 capitalize">
               {{ getLeafName(lastPlayed()!.leaf_id) }}
@@ -86,7 +86,7 @@ import { BattleData, getLeafName, getPlayerId } from '../../models/game.models';
                         class="bg-green-50 hover:bg-green-100 active:scale-95 border border-green-200
                                rounded-xl p-1.5 flex flex-col items-center transition-all
                                touch-manipulation disabled:opacity-50">
-                        <img [src]="leafId + '.jpg'" [alt]="getLeafName(leafId)"
+                        <img [src]="leafId + '.webp'" [alt]="getLeafName(leafId)"
                              class="w-full aspect-square object-cover rounded-lg">
                         <span class="text-[9px] text-gray-600 text-center leading-tight mt-1">
                           {{ getLeafName(leafId) }}
@@ -116,7 +116,7 @@ import { BattleData, getLeafName, getPlayerId } from '../../models/game.models';
               <p class="text-gray-500 text-xs mb-2">
                 <strong class="text-green-700">{{ currentPlayerName() }}</strong> {{ t().droppedBy }}
               </p>
-              <img [src]="droppedLeaf()! + '.jpg'"
+              <img [src]="droppedLeaf()! + '.webp'"
                    class="w-24 h-24 object-cover rounded-2xl mx-auto mb-1.5 shadow-md">
               <p class="font-bold text-green-800 text-sm capitalize">
                 {{ getLeafName(droppedLeaf()!) }}
@@ -158,7 +158,7 @@ import { BattleData, getLeafName, getPlayerId } from '../../models/game.models';
                         [class.ring-2]="selectedLeaf() === leafId"
                         [class.ring-green-500]="selectedLeaf() === leafId && leafId === droppedLeaf()"
                         [class.ring-red-400]="selectedLeaf() === leafId && leafId !== droppedLeaf()">
-                        <img [src]="leafId + '.jpg'" [alt]="getLeafName(leafId)"
+                        <img [src]="leafId + '.webp'" [alt]="getLeafName(leafId)"
                              class="w-full aspect-square object-cover rounded-lg">
                         <span class="text-[9px] text-gray-600 text-center leading-tight mt-1">
                           {{ getLeafName(leafId) }}

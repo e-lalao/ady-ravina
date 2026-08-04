@@ -73,7 +73,7 @@ import { getPlayerId } from '../../models/game.models';
   template: `
     <div class="page">
       <div class="card">
-        <img src="logo-de-e-lalao.png" alt="Ady Ravina" class="logo" />
+        <img src="logo-de-e-lalao.webp" alt="Ady Ravina" class="logo" />
 
         @if (loading()) {
           <p class="loading-msg">{{ t().searching }}</p>

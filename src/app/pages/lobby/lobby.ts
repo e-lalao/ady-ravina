@@ -17,7 +17,7 @@ type Phase = null | 'join' | 'creating';
       <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm border border-green-100">
 
         <div class="flex justify-center mb-4">
-          <img src="accueil-Ady-ravina.png" alt="Ady Ravina" class="h-16 object-contain">
+          <img src="accueil-Ady-ravina.webp" alt="Ady Ravina" class="h-16 object-contain">
         </div>
 
         <!-- Sélecteur de langue -->

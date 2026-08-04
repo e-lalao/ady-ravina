@@ -61,7 +61,7 @@ import { LEAVES, shuffleArray, getPlayerId, BattleData } from '../../models/game
               class="rounded-xl shadow-sm p-1.5 flex flex-col items-center
                      transition-colors duration-75 border border-green-100 touch-manipulation">
               <img
-                [src]="leaf.id + '.jpg'"
+                [src]="leaf.id + '.webp'"
                 [alt]="leaf.name"
                 class="w-full aspect-square object-cover rounded-lg">
               <span class="text-[10px] text-gray-600 text-center leading-tight mt-1 px-0.5">
@@ -96,7 +96,7 @@ import { LEAVES, shuffleArray, getPlayerId, BattleData } from '../../models/game
 
           <!-- Tante, inclinée, surgissant du bas-droit -->
           <img
-            src="tante.png"
+            src="tante.webp"
             alt="Tante"
             class="tante-in absolute bottom-0 right-0 w-56 sm:w-72 pointer-events-auto"
             (click)="dismissTante()">

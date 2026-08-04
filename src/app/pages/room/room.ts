@@ -13,7 +13,7 @@ import { getPlayerId } from '../../models/game.models';
       <div class="bg-white rounded-2xl shadow-lg p-7 w-full max-w-sm border border-green-100">
 
         <div class="flex justify-center mb-5">
-          <img src="accueil-Ady-ravina.png" alt="Ady Ravina"
+          <img src="accueil-Ady-ravina.webp" alt="Ady Ravina"
                class="w-full max-h-36 object-cover rounded-xl">
         </div>
 

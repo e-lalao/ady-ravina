@@ -1,8 +1,24 @@
-﻿import { Component, signal, computed, inject } from '@angular/core';
+﻿import { Component, signal, computed, inject, effect } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { AudioService } from '../../services/audio.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { I18nService } from '../../services/i18n.service';
+
+const SEO_BY_LANG: Record<'mg' | 'fr' | 'en', { title: string; description: string }> = {
+  mg: {
+    title: "Ady Ravina – Kilalao fanaon'ny ankizy malagasy an-tserasera | e-lalao",
+    description: "Ady Ravina: milalao an-tserasera miaraka amin'ny namana ny kilalao fanaon'ny ankizy malagasy. Mamorona vondrona, manasà ny namanao ary manangona ravina mba handresy. Kilalao maimaim-poana nataon'e-lalao.",
+  },
+  fr: {
+    title: 'Ady Ravina – Le jeu traditionnel malgache de bataille de feuilles en ligne | e-lalao',
+    description: "Ady Ravina : jouez en ligne, entre amis, au jeu traditionnel malgache de bataille de feuilles (ravina). Créez une partie, invitez vos proches et collectez des feuilles pour gagner. Un jeu gratuit signé e-lalao pour valoriser la culture malgache.",
+  },
+  en: {
+    title: 'Ady Ravina – The Traditional Malagasy Leaf-Battle Game Online | e-lalao',
+    description: 'Ady Ravina: play the traditional Malagasy leaf-battle game online with friends. Create a room, invite your friends and collect leaves to win. A free game by e-lalao celebrating Malagasy culture.',
+  },
+};
 
 
 @Component({
@@ -384,7 +400,7 @@ import { I18nService } from '../../services/i18n.service';
           <button class="splash-lang-btn" [class.active]="i18n.lang() === 'fr'" (click)="i18n.setLang('fr')">FR</button>
           <button class="splash-lang-btn" [class.active]="i18n.lang() === 'en'" (click)="i18n.setLang('en')">EN</button>
         </div>
-        <img src="accueil-Ady-ravina.png" alt="Ady Ravina" class="splash-logo" />
+        <img src="accueil-Ady-ravina.webp" alt="Ady Ravina - jeu traditionnel malgache de bataille de feuilles" class="splash-logo" />
         <p class="splash-title">Ady Ravina</p>
         <p class="splash-tap">{{ t().splashTap }}</p>
       </div>
@@ -420,7 +436,7 @@ import { I18nService } from '../../services/i18n.service';
           <!-- ── Gauche : texte ── -->
           <div class="left-col">
             <div class="brand-badge">
-              <img src="logo-de-e-lalao.png" alt="e-lalao" class="brand-logo" />
+              <img src="logo-de-e-lalao.webp" alt="Logo e-lalao" class="brand-logo" />
             </div>
 
             <h1 class="game-title">Ady Ravina</h1>
@@ -460,8 +476,8 @@ import { I18nService } from '../../services/i18n.service';
             <div class="image-frame">
               <div class="frame-glow"></div>
               <img
-                src="accueil-Ady-ravina.png"
-                alt="Ady Ravina"
+                src="accueil-Ady-ravina.webp"
+                alt="Illustration du jeu Ady Ravina, bataille de feuilles entre enfants malgaches"
                 class="illustration"
                 [class.jump-anim]="imageAnim()"
               />
@@ -555,7 +571,7 @@ import { I18nService } from '../../services/i18n.service';
 
       <!-- ══════════════════ FOOTER ══════════════════ -->
       <footer class="site-footer">
-        <img src="logo-de-e-lalao.png" alt="e-lalao" class="footer-logo" />
+        <img src="logo-de-e-lalao.webp" alt="Logo e-lalao" class="footer-logo" />
         <p class="footer-line">{{ t().footerLine }}</p>
         <p class="footer-copy">© {{ year }} e-lalao</p>
       </footer>
@@ -566,6 +582,8 @@ import { I18nService } from '../../services/i18n.service';
 export class HomeComponent {
   private router   = inject(Router);
   private supabase = inject(SupabaseService);
+  private titleSvc = inject(Title);
+  private metaSvc  = inject(Meta);
   readonly audio   = inject(AudioService);
 
   readonly i18n = inject(I18nService);
@@ -575,6 +593,14 @@ export class HomeComponent {
   imageAnim = signal(false);
   visitors  = signal<number | null>(null);
   readonly year = new Date().getFullYear();
+
+  constructor() {
+    effect(() => {
+      const seo = SEO_BY_LANG[this.i18n.lang()];
+      this.titleSvc.setTitle(seo.title);
+      this.metaSvc.updateTag({ name: 'description', content: seo.description });
+    });
+  }
 
   async onStart() {
     this.started.set(true);
