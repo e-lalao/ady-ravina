@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /$
+Disallow: /lobby
+Disallow: /room/
+Disallow: /join/
+Disallow: /collect/
+Disallow: /battle/
+Disallow: /results/
+
+Sitemap: https://e-lalao.github.io/ady-ravina/sitemap.xml
